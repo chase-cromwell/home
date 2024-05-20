@@ -6,10 +6,11 @@ markdown: kramdown
 #ins_logo: "./bits-logo.png"
 
 tracking_id: #
+remote_theme: ankitsultana/researcher@gem
 
 footer: yes
-footer_url: "https://github.com/ankitsultana"
-footer_text: "Page design by Ankit Sultana"
+footer_url: "https://github.com/chasecrom"
+#footer_text: "Page design by Ankit Sultana"
 
 sass:
     style: compressed
