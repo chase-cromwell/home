@@ -1,12 +1,12 @@
 title: Researcher
 url: "https://chasecrom.com"
-baseurl: "/home"
+baseurl: "/"
 
 markdown: kramdown
 #ins_logo: "./bits-logo.png"
 
 tracking_id: #
-remote_theme: ankitsultana/researcher@gem
+#remote_theme: ankitsultana/researcher@gem
 
 footer: yes
 footer_url: "https://github.com/chasecrom"
