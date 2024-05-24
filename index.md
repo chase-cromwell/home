@@ -6,13 +6,24 @@ layout: default
 
 <img class="profile-picture" src="sherlock.jpg">
 
-Hi! I am a junior year student of B.E. Computer Science at Birla Institute of Technology and Science, Pilani.
+Hi! I am a recent graduate of the University of Colorado Boulder with a B.A. in Political Science with minors in Leadership Studies and Speech, Language, Hearing Sciences.
 
 This is a jekyll based resume template. You can find the full source code on [GitHub](https://github.com/bk2dcradle/researcher)
 
-## Research Interest
+## Recent Work
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam finibus ipsum ac erat aliquam dapibus. Vestibulum vehicula placerat ex, a consectetur odio pharetra quis. Mauris id urna ante. Fusce pharetra diam ac nisi aliquet, vel egestas ex iaculis. Pellentesque laoreet cursus tellus sed pellentesque. Praesent a rhoncus elit. Nunc ipsum nisl, consequat sit amet pretium quis, gravida id ipsum.
+I was elected as External Affairs Tri-Executive and Student Body President for the 2023-24 academic year. In this role, I oversaw a cabinet of 30 student employees, the management of our $35.5 million student fee budget, and led numerous policy efforts on & off campus.
+:memo: served as key student representative on search committee to select CU Boulder's next Chancellor
+:busts_in_silhouette: hired and led a team of 30 cabinet members to serve the student body through advocacy and policy change
+:speaking_head: testified on more than a dozen bills in the state legislature
+- led student organizing to implement a statewide ban on discriminatory occupancy limits AND a ban on the concealed carry of firearms on higher education campuses
+:spiral_calendar: provided insight to adjust the campus academic calendar, providing more space for student mental health and calmer finals season
+- hosted dozens of events promoting health, safety, sustainability, and so much more
+👩‍⚖️ organized a City Council candidate debate on campus
+- sat on numerous committees to guide the campus' strategic enrollment management, civic and electoral engagement, microcredentialing strategies, campus police oversight, and other areas
+- led policy changes on campus sustainability, safety, accessibility, and others
+- advocated for students rights and safety, during a particularly difficult year for freedom of speech and demonstration
+- expanded programs to offer free pregnancy tests and emergency contraceptives
 
 ## Publications
 
