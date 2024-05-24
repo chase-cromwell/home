@@ -1,8 +1,18 @@
 @import "vars";
 
 .content {
+    a {
+        text-decoration: underline;
+        color: black;
+        text-underline-offset: 3px;
+        text-decoration-color:#469597
+    }
+    
     a:hover {
         text-decoration: underline;
+        color: #469597;
+        text-underline-offset: 3px;
+        text-decoration-color:#469597
     }
     ol {
         counter-reset: list;

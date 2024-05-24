@@ -6,9 +6,8 @@ layout: default
 
 <img class="profile-picture" src="sherlock.jpg">
 
-Hi! I am a recent graduate of the University of Colorado Boulder with a B.A. in Political Science with minors in Leadership Studies and Speech, Language, Hearing Sciences.
+Hi! I am a recent graduate of the University of Colorado Boulder with a B.A. in Political Science with minors in Leadership Studies and Speech, Language, Hearing Sciences. **I am actively looking for a full time role in Washington DC or elsewhere, [lets connect!]()**
 
-This is a jekyll based resume template. You can find the full source code on [GitHub](https://github.com/bk2dcradle/researcher)
 
 ## Recent Work
 
@@ -33,33 +32,3 @@ I was elected as External Affairs Tri-Executive and Student Body President for t
 🌳 led policy changes on campus sustainability, safety, accessibility, and others
 
 🦺 advocated for students rights and safety, during a particularly difficult year for freedom of speech and demonstration
-
-## Publications
-
-1. F.Bar, J.Doe: Effects of having a placeholder of a name
-2. S.Holmes, J.Watson: Consequences of living with a sociopath in London
-
-## Typography
-
-This is a [link](http://google.com). Something *italics* and something **bold**.
-
-Here is a table
-
-Year | Award | Category
------|-------|--------
-2014 | Emmy  | Won Outstanding Lead Actor in a miniseries or a movie
-2015 | BAFTA | Nominated for Best Leading Actor for Sherlock
-2014 | Satellite | Won Best Actor miniseries or television film
-
-Here is a horizontal rule
-
----
-
-Here is a blockquote
-
-> To a great mind, nothing is little
-
-## References
-
-* Foo Bar: Head of Department, Placeholder Names, Lorem
-* John Doe: Associate Professor, Department of Computer Science, Ipsum
