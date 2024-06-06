@@ -4,7 +4,7 @@ layout: default
 
 ## About Me
 
-<img class="profile-picture" src="sherlock.jpg">
+<img class="profile-picture" src="ChaseCircle.png">
 
 Hi! I am a recent graduate of the University of Colorado Boulder with a B.A. in Political Science with minors in Leadership Studies and Speech, Language, Hearing Sciences. **I am actively looking for a full time role in Washington DC or elsewhere, [lets connect!]()**
 
