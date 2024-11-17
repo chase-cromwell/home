@@ -6,7 +6,7 @@ layout: default
 
 <img class="profile-picture" src="ChaseCircle.png">
 
-Hi! I am a recent graduate of the University of Colorado Boulder with a B.A. in Political Science with minors in Leadership Studies and Speech, Language, Hearing Sciences. **I am actively looking for a full time role in Washington DC or elsewhere, [lets connect!]()**
+Hi! I am a recent graduate of the University of Colorado Boulder with a B.A. in Political Science with minors in Leadership Studies and Speech, Language, Hearing Sciences. **I am currently working at the United States Senate in an operations role and always looking for opportunities to lead, [lets connect!](/contact)**
 
 
 ## Recent Work
@@ -19,7 +19,9 @@ I was elected as External Affairs Tri-Executive and Student Body President for t
 
 🏛️ testified on more than a dozen bills in the state legislature
 
-🏡 led student organizing to implement a statewide ban on discriminatory occupancy limits AND a ban on the concealed carry of firearms on higher education campuses
+🚨 led successful multi-year effort to ban concealed carry of firearms on higher education campuses statewide
+
+🏡 led student organizing to implement a statewide ban on discriminatory rental occupancy limits
 
 🗓️ provided insight to adjust the campus academic calendar, providing more space for student mental health and calmer finals season
 
