@@ -19,6 +19,8 @@ sass:
 nav:
  - name: "About"
    link: "/"
+ - name: "In the News"
+   link: "press"
  - name: "Resume"
    link: "resume.pdf"
  - name: "Contact"
