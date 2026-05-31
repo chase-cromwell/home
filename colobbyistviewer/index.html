@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CO Lobbyist Viewer is a free Chrome extension that adds lobbyist disclosure data directly to Colorado General Assembly bill pages." />
+  <title>CO Lobbyist Viewer — See who's lobbying Colorado bills</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #112f4e; --navy-mid: #005ea2; --gold: #a88f48;
+      --text: #2d2e2f; --text-mid: #495057; --text-light: #6c757d;
+      --bg-light: #edf5ff; --border: #dee2e6; --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: "PT Sans", serif; font-size: 16px; color: var(--text); background: var(--white); line-height: 1.6; }
+    a { color: var(--navy-mid); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .site-header { background: var(--navy); border-bottom: 6px solid var(--gold); padding: 0 24px; }
+    .site-header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+    .site-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .site-logo img { width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0; }
+    .site-logo-title { font-size: 20px; font-weight: 700; color: #fcfcfc; line-height: 1; }
+    .site-header-link { font-size: 14px; color: rgba(252,252,252,0.7); text-decoration: none; }
+    .site-header-link:hover { color: #fcfcfc; }
+
+    .hero { background: linear-gradient(160deg, #0b2940 0%, var(--navy) 60%, #1a4b7a 100%); padding: 80px 24px 72px; text-align: center; }
+    .hero-eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 16px; }
+    .hero h1 { font-size: clamp(28px, 4vw, 46px); font-weight: 700; color: #fcfcfc; line-height: 1.2; max-width: 800px; margin: 0 auto 20px; }
+    .hero-sub { font-size: 18px; color: rgba(252,252,252,0.8); max-width: 640px; margin: 0 auto 36px; line-height: 1.6; }
+    .btn-cws { display: inline-flex; align-items: center; gap: 10px; background: #fcfcfc; color: var(--navy); font-family: "PT Sans", serif; font-size: 16px; font-weight: 700; padding: 14px 28px; border-radius: 4px; text-decoration: none; transition: background 0.15s; }
+    .btn-cws:hover { background: #e8f0fe; text-decoration: none; }
+    .btn-cws svg { width: 22px; height: 22px; flex-shrink: 0; }
+    .hero-note { margin-top: 14px; font-size: 13px; color: rgba(252,252,252,0.5); }
+
+    .section { padding: 64px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-alt { background: #f8fafc; }
+    .section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 10px; }
+    .section h2 { font-size: clamp(22px, 3vw, 32px); font-weight: 700; color: var(--navy); margin-bottom: 16px; line-height: 1.25; }
+    .section-intro { font-size: 17px; color: var(--text-mid); max-width: 680px; margin-bottom: 40px; }
+    .hero-screenshot { width: 100%; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 8px 40px rgba(0,0,0,0.13); display: block; }
+
+    .browser-mockup { border-radius: 8px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.15); border: 1px solid #c8cdd3; }
+    .browser-bar { background: #e8eaed; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #c8cdd3; }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .bd-red { background: #ff5f57; } .bd-yellow { background: #febc2e; } .bd-green { background: #28c840; }
+    .browser-url { flex: 1; background: #fff; border: 1px solid #c8cdd3; border-radius: 20px; padding: 4px 14px; font-size: 13px; color: #5f6368; font-family: monospace; text-align: center; }
+    .browser-body { background: #fff; }
+
+    .demo-bill-header { background: #f1f3f4; border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    .demo-bill-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+    .demo-bill-sub { font-size: 13px; color: var(--text-light); }
+
+    .demo-tab-bar { display: flex; padding: 0 16px; border-bottom: 2px solid var(--border); background: #fff; overflow-x: auto; scrollbar-width: none; }
+    .demo-tab-bar::-webkit-scrollbar { display: none; }
+    .demo-tab { padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--navy-mid); white-space: nowrap; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .demo-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+    .demo-ext { font-family: "PT Sans", serif; }
+    .demo-accordion-header { background: var(--navy); border-bottom: 6px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .demo-accordion-title { font-size: 18px; font-weight: 700; color: #fcfcfc; }
+    .demo-tally { display: flex; flex-wrap: wrap; gap: 6px; }
+    .demo-tally-badge { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 3px; }
+    .dt-supporting { background: #d4edda; color: #155724; }
+    .dt-opposing   { background: #f8d7da; color: #721c24; }
+    .dt-amending   { background: #fff3cd; color: #856404; }
+    .dt-monitoring { background: #d1ecf1; color: #0c5460; }
+
+    .demo-search-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 24px; border-bottom: 1px solid var(--border); background: #fff; }
+    .demo-search-left { display: flex; align-items: center; gap: 10px; }
+    .demo-search-input { width: 240px; font-family: "PT Sans", serif; font-size: 14px; color: var(--text); border: 1px solid #ced4da; border-radius: 4px; padding: 5px 10px; outline: none; }
+    .demo-search-input:focus { border-color: var(--navy-mid); box-shadow: 0 0 0 2px rgba(0,94,162,0.2); }
+    .demo-search-count { font-size: 13px; color: var(--text-light); white-space: nowrap; }
+    .demo-actions { display: flex; gap: 14px; font-size: 13px; font-weight: 600; color: var(--navy-mid); opacity: 0.6; }
+
+    .demo-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .demo-table thead th { background: var(--bg-light); color: #333; font-weight: 700; padding: 12px 24px; font-size: 15px; text-align: left; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); }
+    .demo-table thead th:hover { background: #d6e8ff; }
+    .demo-table tbody tr:nth-child(even) { background: #fafafa; }
+    .demo-table tbody td { padding: 12px 24px; vertical-align: top; font-size: 15px; border-bottom: 1px solid #f1f3f5; }
+    .demo-client-name { font-weight: 700; margin-bottom: 2px; }
+    .demo-firms { font-size: 13px; color: var(--text-mid); margin-bottom: 1px; }
+    .demo-lobbyists { font-size: 12px; color: var(--text-light); }
+    .demo-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+    .demo-badge { display: inline-block; padding: 2px 9px; border-radius: 3px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .db-supporting { background: #d4edda; color: #155724; }
+    .db-opposing   { background: #f8d7da; color: #721c24; }
+    .db-amending   { background: #fff3cd; color: #856404; }
+    .db-monitoring { background: #d1ecf1; color: #0c5460; }
+    .demo-date { font-size: 11px; color: var(--text-light); white-space: nowrap; }
+    .demo-arrow { color: #adb5bd; font-size: 12px; }
+    .demo-sort-icon { font-size: 11px; opacity: 0.55; margin-left: 4px; }
+    .demo-table-wrap { max-height: 420px; overflow-y: auto; }
+    .demo-empty { padding: 32px; text-align: center; color: var(--text-light); font-size: 14px; }
+    .demo-note { font-size: 11px; color: var(--text-light); padding: 8px 24px; background: #f8fafc; border-top: 1px solid var(--border); text-align: center; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step { background: var(--white); border: 1px solid var(--border); border-top: 4px solid var(--navy); border-radius: 4px; padding: 28px 24px; }
+    .step-num { font-size: 32px; font-weight: 700; color: var(--bg-light); line-height: 1; margin-bottom: 12px; }
+    .step h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .step p { font-size: 15px; color: var(--text-mid); line-height: 1.55; }
+
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .data-card { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+    .data-card h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .data-card p { font-size: 15px; color: var(--text-mid); line-height: 1.55; }
+
+    .cta-strip { background: var(--navy); border-top: 6px solid var(--gold); padding: 56px 24px; text-align: center; }
+    .cta-strip h2 { font-size: 28px; font-weight: 700; color: #fcfcfc; margin-bottom: 12px; }
+    .cta-strip p { font-size: 17px; color: rgba(252,252,252,0.75); margin-bottom: 28px; }
+
+    .privacy-section { padding: 48px 24px; background: #f8fafc; }
+    .privacy-inner { max-width: 800px; margin: 0 auto; }
+    .privacy-toggle { width: 100%; background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; font-family: "PT Sans", serif; font-size: 15px; font-weight: 700; color: var(--navy); cursor: pointer; text-align: left; }
+    .privacy-toggle:hover { background: var(--bg-light); }
+    .privacy-icon { font-size: 20px; transition: transform 0.2s; }
+    .privacy-toggle[aria-expanded="true"] .privacy-icon { transform: rotate(45deg); }
+    .privacy-body { display: none; background: var(--white); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; padding: 24px; }
+    .privacy-body.open { display: block; }
+    .privacy-body h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin: 20px 0 6px; }
+    .privacy-body h3:first-child { margin-top: 0; }
+    .privacy-body p, .privacy-body li { font-size: 14px; color: var(--text-mid); line-height: 1.6; margin-bottom: 6px; }
+    .privacy-body ul { padding-left: 20px; margin-bottom: 8px; }
+    .privacy-updated { font-size: 12px; color: var(--text-light); margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+    .site-footer { background: var(--navy); padding: 28px 24px; text-align: center; }
+    .site-footer p { font-size: 13px; color: rgba(252,252,252,0.55); line-height: 1.8; }
+    .site-footer a { color: rgba(252,252,252,0.75); }
+    .site-footer a:hover { color: #fcfcfc; }
+
+    @media (max-width: 768px) {
+      .steps, .data-grid { grid-template-columns: 1fr; }
+      .demo-actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="site-logo" href="https://chasecrom.com/colobbyist-extension">
+      <img src="icon128.png" alt="Colorado Lobbyist Viewer icon" />
+      <span class="site-logo-title">Colorado Lobbyist Viewer</span>
+    </a>
+    <a class="site-header-link" href="https://leg.colorado.gov" target="_blank">leg.colorado.gov ↗</a>
+  </div>
+</header>
+
+<section class="hero">
+  <p class="hero-eyebrow">Free Chrome Extension &nbsp;·&nbsp; Colorado General Assembly</p>
+  <h1>Know who's lobbying Colorado bills — right on the bill page.</h1>
+  <p class="hero-sub">CO Lobbyist Viewer surfaces registered lobbyist positions directly inside the Colorado General Assembly website, so you can see who's behind a bill without opening a new tab or digging through state databases.</p>
+  <a href="#" class="btn-cws">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="#4285F4"/><path d="M12 7.5h9.27A10 10 0 1 0 12 22V17a5 5 0 1 1 0-10z" fill="url(#cg1)" opacity=".9"/><defs><linearGradient id="cg1" x1="3" y1="7" x2="21" y2="17" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#EA4335"/><stop offset="33%" stop-color="#FBBC05"/><stop offset="66%" stop-color="#34A853"/><stop offset="100%" stop-color="#4285F4"/></linearGradient></defs></svg>
+    Add to Chrome — It's Free
+  </a>
+  <p class="hero-note">Chrome only &nbsp;·&nbsp; No account required &nbsp;·&nbsp; Open source</p>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <p class="section-label">What you get</p>
+    <h2>A new tab — right where you're already reading.</h2>
+    <p class="section-intro">Every bill page on <a href="https://leg.colorado.gov" target="_blank">leg.colorado.gov</a> gets a <strong>Lobbyists</strong> tab alongside Bill Text, Committees, and Votes. No new windows, no searching databases — it's just there.</p>
+    <img class="hero-screenshot" src="screenshots/screenshot-1.jpg" alt="The Lobbyists tab on a Colorado legislature bill page showing registered positions, stance badges, and a summary breakdown." />
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="section-inner">
+    <p class="section-label">Live demo</p>
+    <h2>Try it — real data, real bill.</h2>
+    <p class="section-intro">This is actual lobbyist disclosure data for <a href="https://leg.colorado.gov/bills/hb26-1268" target="_blank">HB26-1268 — Renewable Energy Development on Disturbed Lands</a>, exactly as it appears in the extension. Search, sort, explore.</p>
+
+    <div class="browser-mockup">
+      <div class="browser-bar">
+        <div class="browser-dots"><div class="browser-dot bd-red"></div><div class="browser-dot bd-yellow"></div><div class="browser-dot bd-green"></div></div>
+        <div class="browser-url">leg.colorado.gov/bills/hb26-1268</div>
+      </div>
+      <div class="browser-body">
+        <div class="demo-bill-header">
+          <div class="demo-bill-title">HB26-1268 &mdash; Renewable Energy Development on Disturbed Lands</div>
+          <div class="demo-bill-sub">2025&ndash;2026 Session &nbsp;·&nbsp; Colorado General Assembly</div>
+        </div>
+        <div class="demo-tab-bar">
+          <div class="demo-tab">Bill Text</div>
+          <div class="demo-tab">Fiscal</div>
+          <div class="demo-tab">Committees</div>
+          <div class="demo-tab">Votes</div>
+          <div class="demo-tab">Amendments</div>
+          <div class="demo-tab">Bill History</div>
+          <div class="demo-tab">Sponsors</div>
+          <div class="demo-tab active">Lobbyists</div>
+        </div>
+        <div class="demo-ext">
+          <div class="demo-accordion-header">
+            <div class="demo-accordion-title">Clients with Registered Positions (37)</div>
+            <div class="demo-tally">
+              <span class="demo-tally-badge dt-supporting">Supporting: 22</span>
+              <span class="demo-tally-badge dt-opposing">Opposing: 2</span>
+              <span class="demo-tally-badge dt-amending">Amending: 5</span>
+              <span class="demo-tally-badge dt-monitoring">Monitoring: 22</span>
+            </div>
+          </div>
+          <div class="demo-search-bar">
+            <div class="demo-search-left">
+              <input type="search" id="demo-search" class="demo-search-input" placeholder="Search client, firm, or lobbyist…" autocomplete="off" />
+              <span class="demo-search-count" id="demo-count"></span>
+            </div>
+            <div class="demo-actions">
+              <span>ⓘ Data Note</span>
+              <span>? About</span>
+              <span>✉ Feedback</span>
+            </div>
+          </div>
+          <div class="demo-table-wrap">
+            <table class="demo-table" role="table">
+              <thead>
+                <tr>
+                  <th data-col="client" style="width:55%">Client / Lobbyist <span class="demo-sort-icon" id="icon-client">↑</span></th>
+                  <th data-col="position">Position <span class="demo-sort-icon" id="icon-position">↕</span></th>
+                </tr>
+              </thead>
+              <tbody id="demo-tbody"></tbody>
+            </table>
+          </div>
+          <div class="demo-note">
+            Real data from the <a href="https://data.colorado.gov/Legislative/Professional-Lobbyist-Bills-in-Colorado/sche-yqzf/about_data" target="_blank">Colorado Secretary of State</a> &nbsp;·&nbsp; Updated nightly &nbsp;·&nbsp;
+            <a href="https://leg.colorado.gov/bills/hb26-1268" target="_blank">View HB26-1268 on leg.colorado.gov ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <p class="section-label">How it works</p>
+    <h2>Install once. Works on every bill.</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h3>Install the extension</h3><p>Add it to Chrome in one click from the Chrome Web Store. No account, no sign-in, no setup required.</p></div>
+      <div class="step"><div class="step-num">2</div><h3>Navigate to any bill</h3><p>Go to <a href="https://leg.colorado.gov" target="_blank">leg.colorado.gov</a> and open any bill or resolution page. The extension activates automatically.</p></div>
+      <div class="step"><div class="step-num">3</div><h3>Click the Lobbyists tab</h3><p>A new tab appears alongside the existing ones. Click it to see who's filed positions, search by name, and sort by stance.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="section-inner">
+    <p class="section-label">About the data</p>
+    <h2>Public record, made accessible.</h2>
+    <p class="section-intro">All lobbyist disclosure data is public record, required by Colorado law and filed with the Secretary of State. This extension just makes it easier to find.</p>
+    <div class="data-grid">
+      <div class="data-card"><h3>Source</h3><p>Data comes from the <a href="https://data.colorado.gov/Legislative/Professional-Lobbyist-Bills-in-Colorado/sche-yqzf/about_data" target="_blank">Colorado Secretary of State's Professional Lobbyist Bills dataset</a>, published via the Colorado Information Marketplace.</p></div>
+      <div class="data-card"><h3>Update frequency</h3><p>Lobbyist positions are reported monthly during session (January–May). The extension's database refreshes nightly. Data may lag current activity by up to 30 days during session.</p></div>
+      <div class="data-card"><h3>Data processing</h3><p>Raw state data is cleaned for readability — capitalization normalized, redundant firm names removed. Multiple monthly filings are consolidated into unified timelines, and lobbyists for the same client with the same stance are grouped into one entry.</p></div>
+      <div class="data-card"><h3>Limitations</h3><p>Registrations are self-reported. The same organization sometimes appears under slightly different name spellings, which can create duplicate entries. Use position counts as a general indicator, not a precise tally.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner" style="max-width:800px;">
+    <p class="section-label">Permissions &amp; Privacy</p>
+    <h2>Minimal access. Nothing unexpected.</h2>
+    <p class="section-intro">CO Lobbyist Viewer requests three permissions — here's exactly what each one does.</p>
+    <div class="data-grid">
+      <div class="data-card">
+        <h3>leg.colorado.gov access</h3>
+        <p>The extension only activates on Colorado General Assembly bill pages. It cannot read or modify any other website you visit.</p>
+      </div>
+      <div class="data-card">
+        <h3>Storage</h3>
+        <p>Saves a single randomly generated anonymous ID to your browser so returning visits aren't counted as new users in aggregate analytics. No personal information is stored.</p>
+      </div>
+      <div class="data-card" style="grid-column: span 2;">
+        <h3>Active tab</h3>
+        <p>Allows the extension to add the Lobbyists tab to the page you're currently viewing. It does not run in the background or access tabs you haven't opened. The extension never reads your browsing history, accesses other tabs, or transmits any personally identifiable information.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <h2>Free. Open source. Takes 10 seconds to install.</h2>
+  <p>Works on every bill and resolution page on leg.colorado.gov.</p>
+  <a href="#" class="btn-cws">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="#4285F4"/><path d="M12 7.5h9.27A10 10 0 1 0 12 22V17a5 5 0 1 1 0-10z" fill="url(#cg2)" opacity=".9"/><defs><linearGradient id="cg2" x1="3" y1="7" x2="21" y2="17" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#EA4335"/><stop offset="33%" stop-color="#FBBC05"/><stop offset="66%" stop-color="#34A853"/><stop offset="100%" stop-color="#4285F4"/></linearGradient></defs></svg>
+    Add to Chrome — It's Free
+  </a>
+</section>
+
+<section class="privacy-section">
+  <div class="privacy-inner">
+    <p style="font-size:13px;color:var(--text-light);margin-bottom:10px;text-align:center;">
+      Questions? Drop me a note at <a href="mailto:chase@chasecrom.com">chase@chasecrom.com</a> or <a href="#">leave anonymous feedback here</a>.
+    </p>
+    <button class="privacy-toggle" aria-expanded="false" onclick="togglePrivacy(this)">
+      Privacy Policy <span class="privacy-icon">+</span>
+    </button>
+    <div class="privacy-body" id="privacy-body">
+      <h3>What data is collected</h3>
+      <ul>
+        <li><strong>Bill pages visited</strong> — the bill number is logged when you visit a bill page with the extension active.</li>
+        <li><strong>Feature usage</strong> — whether you opened the Lobbyists tab, used search, or sorted results. No search queries are recorded.</li>
+        <li><strong>An anonymous identifier</strong> — a randomly generated ID stored locally in your browser. Cannot be linked to you personally.</li>
+      </ul>
+      <h3>What is NOT collected</h3>
+      <ul><li>Your name, email, or any personally identifiable information</li><li>Your IP address</li><li>The content of any search query</li><li>Any information from other websites or tabs</li></ul>
+      <h3>Data processors</h3>
+      <ul>
+        <li><strong>Google Analytics (GA4)</strong> via the Measurement Protocol API. Data is sent from a server, not directly from your browser. Subject to <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>. No cookies are set.</li>
+        <li><strong>Cloudflare</strong> — the extension's data API runs on Cloudflare Workers. Subject to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare's Privacy Policy</a>.</li>
+      </ul>
+      <h3>Lobbyist data</h3>
+      <p>All lobbyist disclosure data is public record provided by the Colorado Secretary of State. No private information is displayed.</p>
+      <h3>Data disclaimer</h3>
+      <p>The data made available here has been modified for use from its original source, which is the State of Colorado. THE STATE OF COLORADO MAKES NO REPRESENTATIONS OR WARRANTY AS TO THE COMPLETENESS, ACCURACY, TIMELINESS, OR CONTENT OF ANY DATA MADE AVAILABLE THROUGH THIS SITE. Use of this data is subject to the <a href="https://data.colorado.gov/terms" target="_blank">Colorado Information Marketplace Terms of Use</a>.</p>
+      <h3>Your choices</h3>
+      <p>Remove the extension at any time from <code>chrome://extensions</code>. This deletes the local anonymous identifier and stops all data collection.</p>
+      <p class="privacy-updated">Last updated: May 2026</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>
+    Built by <a href="https://chasecrom.com">Chase Cromwell</a> &nbsp;·&nbsp;
+    <a href="https://leg.colorado.gov" target="_blank">Colorado General Assembly</a> &nbsp;·&nbsp;
+    Data: <a href="https://data.colorado.gov/Legislative/Professional-Lobbyist-Bills-in-Colorado/sche-yqzf/about_data" target="_blank">Colorado Secretary of State</a>
+    <br />Not affiliated with the Colorado General Assembly or Secretary of State.
+    <br /><br />
+    <span style="font-size:11px;color:rgba(252,252,252,0.35);">The data made available here has been modified for use from its original source, which is the State of Colorado. THE STATE OF COLORADO MAKES NO REPRESENTATIONS OR WARRANTY AS TO THE COMPLETENESS, ACCURACY, TIMELINESS, OR CONTENT OF ANY DATA MADE AVAILABLE THROUGH THIS SITE.</span>
+  </p>
+</footer>
+
+<script>
+const LOBBYISTS = [{"client_name":"Adams County","firms":["Clear Strategies"],"lobbyists":["O'Keefe, Margaret-Mary S"],"positions":[{"stance":"Amending","from":"03/11/2026","to":"03/18/2026"},{"stance":"Supporting","from":null,"to":null}],"position_changed":true},{"client_name":"Colorado Counties Inc","firms":[],"lobbyists":["First, Katherine C."],"positions":[{"stance":"Amending","from":"03/05/2026","to":"04/17/2026"},{"stance":"Monitoring","from":null,"to":null}],"position_changed":true},{"client_name":"GreenLatinos","firms":["Mendez, Barkis and Associates"],"lobbyists":["Mendez, Florangel M"],"positions":[{"stance":"Supporting","from":"03/05/2026","to":"03/09/2026"},{"stance":"Monitoring","from":"03/09/2026","to":"03/26/2026"},{"stance":"Amending","from":null,"to":null}],"position_changed":true},{"client_name":"Platte River Power Authority","firms":["HB Strategies","J. Andrew Green & Assoc., Inc."],"lobbyists":["Goff, Erin E","Green Turner, Joan Andrew","Hackenberger, Carrie","Hackenberger, Micki M","LaBriola, Lisa","Lo, Elizabeth","Neimond, Kevin"],"positions":[{"stance":"Amending","from":"03/03/2026","to":"03/11/2026"},{"stance":"Monitoring","from":"03/11/2026","to":"04/02/2026"},{"stance":"Supporting","from":null,"to":null}],"position_changed":true},{"client_name":"Southern Ute Indian Tribe","firms":["Sewald Hanfling Public Affairs"],"lobbyists":["Hanfling, Josh","Cook, Mariah Catherine","Sewald, R.D."],"positions":[{"stance":"Amending","from":"03/02/2026","to":"03/12/2026"},{"stance":"Monitoring","from":null,"to":null}],"position_changed":true},{"client_name":"Tri-State Generation and Transmission","firms":[],"lobbyists":["Cannon, Leslie M"],"positions":[{"stance":"Amending","from":"02/26/2026","to":"04/01/2026"},{"stance":"Monitoring","from":null,"to":null}],"position_changed":true},{"client_name":"Associated Governments of Northwest Colorado","firms":["Orf & Orf PC"],"lobbyists":["Orf, Richard Benedict","ORF, Dianna"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Audubon Rockies","firms":["Siegel Long Public Affairs, LLC"],"lobbyists":["Ordelheide, Melissa Beth"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"City of Boulder","firms":[],"lobbyists":["Stauffer, Heather"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"City of Greeley","firms":["Purple Label Government Solutions, LLC"],"lobbyists":["LaCrue, Matthew","Reynolds, Ellie Katelynn"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"City of Longmont","firms":[],"lobbyists":["Seader, Sandra"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Civitas","firms":["HB Strategies","J. Andrew Green & Assoc., Inc."],"lobbyists":["Goff, Erin E","Hackenberger, Carrie","Neimond, Kevin"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Clean Air Task Force","firms":["Orrange Political Strategies, LLC"],"lobbyists":["Orrange, Sara E","West, Dan"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Association of Municipal Utilities","firms":[],"lobbyists":["Means, Nicole"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Communities for Climate Action","firms":["Morse Public Affairs, LLC","Schultz Public Affairs, LLC"],"lobbyists":["Morse, Alan J","Schultz, Eliza J"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Farm Bureau","firms":["Colorado Legislative Strategies"],"lobbyists":["Layton, Melanie M.","McReynolds, Michael","Woodhouse, Caroline","Melnikoff, Brandon L","Vorthmann, Garin"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Municipal League","firms":["Colorado Municipal League"],"lobbyists":["Stables, Beverly"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Rural Electric Association","firms":["The Capstone Group, LLC"],"lobbyists":["Marchun, Mary E","Nuechterlein, Samantha Anne","Ward, Taylor Blake"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Solar & Storage Association","firms":["Weaver Strategies, LLC"],"lobbyists":["Weaver, Kachina Marin"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Colorado Springs Utilities","firms":[],"lobbyists":["Means, Nicole"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Conservation Colorado","firms":[],"lobbyists":["Aghababian, Sidra Madeleine","Webster, Brien James"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"County of Weld","firms":["Colorado Legislative Strategies"],"lobbyists":["McReynolds, Michael","Layton, Melanie M.","Woodhouse, Caroline","Vorthmann, Garin"],"positions":[{"stance":"Amending","from":"02/25/2026","to":"05/28/2026"}],"position_changed":false},{"client_name":"Delta Montrose Electric Association","firms":["Coleman Legislative Advocacy LLC"],"lobbyists":["Coleman, Timothy","Balcerovich, Steve"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Gilpin County Commissioners","firms":["The Policy Matters, LLC"],"lobbyists":["Hancock, Deanna Katherine","Kelly-Bowry, Tanya","Luna Lara, Ximena","Retzko, Heather"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Grand Valley Power","firms":["Coleman Legislative Advocacy LLC"],"lobbyists":["Coleman, Timothy"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Larimer County Government","firms":[],"lobbyists":["Michelle, Bird Anna-Christina"],"positions":[{"stance":"Opposing","from":null,"to":null}],"position_changed":false},{"client_name":"League of Women Voters of Colorado","firms":["Allied Agenda, LLC"],"lobbyists":["Wilkins, Andrea Kay"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Mountain Parks Electric Inc.","firms":["Coleman Legislative Advocacy LLC"],"lobbyists":["Balcerovich, Steve","Coleman, Timothy"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Natural Resources Defense Council","firms":["Siegel Long Public Affairs, LLC"],"lobbyists":["Gilchrist, Sam","Long, Rebecca"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Northern Colorado Legislative Alliance","firms":["Capitol Solutions/Sandra Hagen Solin"],"lobbyists":["Solin, Sandra Hagen"],"positions":[{"stance":"Opposing","from":null,"to":null}],"position_changed":false},{"client_name":"Parker Authority for Reinvestment","firms":["HB Strategies","J. Andrew Green & Assoc., Inc."],"lobbyists":["Goff, Erin E","Hackenberger, Carrie","Neimond, Kevin"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false},{"client_name":"Sierra Club - Colorado","firms":["Mendez, Barkis and Associates"],"lobbyists":["McCarthy, Danny","Royer, Garrett"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"The Nature Conservancy","firms":["Politicalworks, LLC"],"lobbyists":["Kelty, Kelli Gayle"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Western Colorado Alliance","firms":[],"lobbyists":["McDermott, Tyler John"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Western Resource Advocates","firms":[],"lobbyists":["Gelay, Jessica"],"positions":[{"stance":"Supporting","from":null,"to":null}],"position_changed":false},{"client_name":"Xcel Energy","firms":[],"lobbyists":["Figg, Chloe Olivia"],"positions":[{"stance":"Monitoring","from":null,"to":null}],"position_changed":false}];
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+const SUPPORT_FIRST={Supporting:0,Amending:1,Opposing:2,Monitoring:3};
+const OPPOSE_FIRST={Opposing:0,Amending:1,Supporting:2,Monitoring:3};
+let sortCol='client', sortDir='asc', searchQuery='';
+
+function stanceClass(s){return {supporting:'db-supporting',opposing:'db-opposing',amending:'db-amending',monitoring:'db-monitoring'}[s.toLowerCase()]||'';}
+
+function buildPositionHtml(positions){
+  return positions.map((p,i)=>{
+    const next=positions[i+1];
+    const arrow=i>0?'<span class="demo-arrow">&#8594;</span> ':'';
+    const contiguous=next&&p.to===next.from;
+    let date='';
+    if(p.from){
+      date=contiguous
+        ?`<span class="demo-date">${esc(p.from)}</span>`
+        :`<span class="demo-date">${esc(p.from)}${p.to?' &ndash; '+esc(p.to):''}</span>`;
+    }
+    return `${arrow}<span class="demo-badge ${stanceClass(p.stance)}">${esc(p.stance)}</span> ${date}`;
+  }).join(' ');
+}
+
+function latestStance(e){return e.positions[e.positions.length-1]?.stance||'';}
+
+function getSorted(){
+  const d=[...LOBBYISTS];
+  if(sortCol==='client'){d.sort((a,b)=>{const c=a.client_name.localeCompare(b.client_name);return sortDir==='asc'?c:-c;});}
+  else{const order=sortDir==='asc'?SUPPORT_FIRST:OPPOSE_FIRST;d.sort((a,b)=>{const ra=order[latestStance(a)]??99,rb=order[latestStance(b)]??99;return ra!==rb?ra-rb:a.client_name.localeCompare(b.client_name);});}
+  return d;
+}
+
+function getFiltered(data){
+  if(!searchQuery)return data;
+  const q=searchQuery.toLowerCase();
+  return data.filter(e=>e.client_name.toLowerCase().includes(q)||e.firms.some(f=>f.toLowerCase().includes(q))||e.lobbyists.some(l=>l.toLowerCase().includes(q)));
+}
+
+function renderRows(){
+  const data=getFiltered(getSorted());
+  const tbody=document.getElementById('demo-tbody');
+  const countEl=document.getElementById('demo-count');
+  if(data.length===0){
+    const emptyRow=document.createElement('tr');
+    const emptyCell=document.createElement('td');
+    emptyCell.colSpan=2;
+    emptyCell.className='demo-empty';
+    emptyCell.textContent=searchQuery?`No results for "${searchQuery}"`:'No data.';
+    emptyRow.appendChild(emptyCell);
+    tbody.replaceChildren(emptyRow);
+  } else {
+    const fragment=document.createDocumentFragment();
+    data.forEach(e=>{
+      const tr=document.createElement('tr');
+      // Client cell
+      const tdClient=document.createElement('td');
+      const nameDiv=document.createElement('div');
+      nameDiv.className='demo-client-name';
+      nameDiv.textContent=e.client_name;
+      tdClient.appendChild(nameDiv);
+      if(e.firms.length){
+        const firmsDiv=document.createElement('div');
+        firmsDiv.className='demo-firms';
+        firmsDiv.textContent=e.firms.join('; ');
+        tdClient.appendChild(firmsDiv);
+      }
+      if(e.lobbyists.length){
+        const lobsDiv=document.createElement('div');
+        lobsDiv.className='demo-lobbyists';
+        lobsDiv.textContent=e.lobbyists.join(', ');
+        tdClient.appendChild(lobsDiv);
+      }
+      // Position cell — uses innerHTML only for our own hardcoded data + escaped dates
+      const tdPos=document.createElement('td');
+      const badgesDiv=document.createElement('div');
+      badgesDiv.className='demo-badges';
+      badgesDiv.innerHTML=buildPositionHtml(e.positions);
+      tdPos.appendChild(badgesDiv);
+      tr.appendChild(tdClient);
+      tr.appendChild(tdPos);
+      fragment.appendChild(tr);
+    });
+    tbody.replaceChildren(fragment);
+  }
+  countEl.textContent=searchQuery?`${data.length} of ${LOBBYISTS.length} shown`:'';
+  ['client','position'].forEach(col=>{
+    const icon=document.getElementById(`icon-${col}`);
+    if(icon)icon.textContent=sortCol===col?(sortDir==='asc'?'↑':'↓'):'↕';
+  });
+}
+
+document.querySelectorAll('.demo-table th[data-col]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col=th.getAttribute('data-col');
+    if(sortCol===col){sortDir=sortDir==='asc'?'desc':'asc';}else{sortCol=col;sortDir='asc';}
+    renderRows();
+  });
+});
+
+document.getElementById('demo-search').addEventListener('input',e=>{
+  searchQuery=e.target.value.trim();
+  renderRows();
+});
+
+function togglePrivacy(btn){
+  const body=document.getElementById('privacy-body');
+  const expanded=btn.getAttribute('aria-expanded')==='true';
+  btn.setAttribute('aria-expanded',String(!expanded));
+  body.classList.toggle('open',!expanded);
+}
+
+renderRows();
+</script>
+</body>
+</html>
